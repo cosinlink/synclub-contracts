@@ -44,13 +44,27 @@ interface IStakeManager {
 
     function undelegate()
         external
+        payable
+        returns (uint256 _uuid, uint256 _amount);
+
+    function undelegateAll()
+        external
+        payable
         returns (uint256 _uuid, uint256 _amount);
 
     function claimUndelegated() external returns (uint256, uint256);
 
-    function claimFailedDelegation() external returns (uint256);
+    function claimUndelegatedAll() external returns (uint256 _uuid, uint256 _amount);
+
+    function claimFailedDelegation(bool) external returns (uint256);
 
     function compoundRewards() external;
+
+    function depositReserve() external payable;
+
+    function withdrawReserve(uint256) external;
+
+    function setReserveAmount(uint256) external;
 
     function proposeNewManager(address _address) external;
 
@@ -62,12 +76,9 @@ interface IStakeManager {
 
     function setBCValidator(address _address) external;
 
-    function setMinDelegateThreshold(uint256 _minDelegateThreshold) external;
-
-    function setMinUndelegateThreshold(uint256 _minUndelegateThreshold)
-        external;
-
     function setSynFee(uint256 _synFee) external;
+
+    function setRevenuePool(address _address) external;
 
     function setRedirectAddress(address _address) external;
 
@@ -111,7 +122,9 @@ interface IStakeManager {
         view
         returns (uint256);
 
+    event Deposit(address _src, uint256 _amount);
     event Delegate(uint256 _amount);
+    event DelegateTo(address indexed _validator, uint256 _amount, bool _delegateVotePower);
     event ReDelegate(address _src, address _dest, uint256 _amount);
     event RequestWithdraw(address indexed _account, uint256 _amountInBnbX);
     event ClaimWithdrawal(
@@ -120,16 +133,18 @@ interface IStakeManager {
         uint256 _amount
     );
     event Undelegate(uint256 _uuid, uint256 _amount);
+    event UndelegateAll(uint256 _allAmount, uint256 _amount);
     event Redelegate(uint256 _rewardsId, uint256 _amount);
     event SetManager(address indexed _address);
     event ProposeManager(address indexed _address);
-    event SetBotRole(address indexed _address);
-    event RevokeBotRole(address indexed _address);
-    event SetMinDelegateThreshold(uint256 _minDelegateThreshold);
-    event SetMinUndelegateThreshold(uint256 _minUndelegateThreshold);
     event SetSynFee(uint256 _synFee);
     event SetRedirectAddress(address indexed _address);
     event SetBCValidator(address indexed _address);
     event SetRevenuePool(address indexed _address);
     event RewardsCompounded(uint256 _amount);
+    event DelegateReserve(uint256 _amount);
+    event UndelegateReserve(uint256 _amount);
+    event SetReserveAmount(uint256 _amount);
+    event ClaimUndelegated(uint256 _uuid, uint256 _amount);
+    event ClaimFailedDelegation(uint256 _amount, bool _withReserve);
 }

@@ -4,10 +4,14 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-import "./interfaces/ISnBnb.sol";
+import "./interfaces/ISLisBNB.sol";
 
-contract SnBnb is ISnBnb, ERC20Upgradeable, AccessControlUpgradeable {
+contract SLisBNB is ISLisBNB, ERC20Upgradeable, AccessControlUpgradeable {
     address private stakeManager;
+
+    string private constant _name = "Staked Lista BNB";
+
+    string private constant _symbol = "slisBNB";
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -16,11 +20,19 @@ contract SnBnb is ISnBnb, ERC20Upgradeable, AccessControlUpgradeable {
 
     function initialize(address _admin) external override initializer {
         __AccessControl_init();
-        __ERC20_init("Synclub Staked BNB", "SnBNB");
+        __ERC20_init(_name, _symbol);
 
         require(_admin != address(0), "zero address provided");
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
+    }
+
+    function name() public pure override returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public pure override returns (string memory) {
+        return _symbol;
     }
 
     function mint(address _account, uint256 _amount)

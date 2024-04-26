@@ -1,6 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { HardhatUserConfig, task } from "hardhat/config";
-import { deployDirect, deployProxy, upgradeProxy } from "./scripts/tasks";
+import {
+  deployDirect,
+  deployProxy,
+  upgradeProxy,
+  validateUpgrade,
+} from "./scripts/tasks";
 
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
@@ -16,7 +21,6 @@ import {
   ETHERSCAN_API_KEY,
   SMART_CHAIN_RPC,
   CHAIN_ID,
-  GAS_PRICE,
 } from "./environment";
 
 task("deploySnBnbProxy", "Deploy SnBnb Proxy only")
@@ -77,6 +81,14 @@ task(
   await deployDirect(hre, "SnStakeManager");
 });
 
+task(
+  "deploySLisBNBImpl",
+  "Deploy SLisBNB Implementation only, which is the new version of SnBnb"
+).setAction(async (args, hre: HardhatRuntimeEnvironment) => {
+  await validateUpgrade(hre, "SnBnb", "SLisBNB");
+  await deployDirect(hre, "SLisBNB");
+});
+
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   solidity: {
@@ -103,10 +115,17 @@ const config: HardhatUserConfig = {
       chainId: Number(CHAIN_ID),
       accounts: [DEPLOYER_PRIVATE_KEY],
     },
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
+  },
+  mocha: {
+    timeout: 40000,
   },
   gasReporter: {
     currency: "USD",
-    gasPrice: Number(GAS_PRICE),
+    gasPrice: 100,
+    // enabled: process.env.REPORT_GAS ? true : false,
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
